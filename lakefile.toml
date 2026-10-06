@@ -1,0 +1,10 @@
+name = "shakti_lean"
+version = "0.1.0"
+defaultTargets = ["shakti_lean"]
+
+[[lean_lib]]
+name = "ShaktiLean"
+
+[[lean_exe]]
+name = "shakti_lean"
+root = "Main"
