@@ -4,21 +4,25 @@ import ShaktiLean.Protocol
 
 namespace WaylandProtocol
 
+-- Generic find function using Named type class
+def findByName [Named α] (name : String) (items : List α) : Option α :=
+  items.find? (fun item => Named.getName item = name)
+
 -- Find an interface by name
 def findInterface (name : String) (interfaces : List Interface) : Option Interface :=
-  interfaces.find? (fun iface => iface.name = name)
+  findByName name interfaces
 
 -- Find a request by name in an interface
 def findRequest (name : String) (iface : Interface) : Option Message :=
-  iface.requests.find? (fun msg => msg.name = name)
+  findByName name iface.requests
 
 -- Find an event by name in an interface
 def findEvent (name : String) (iface : Interface) : Option Message :=
-  iface.events.find? (fun msg => msg.name = name)
+  findByName name iface.events
 
 -- Find an enum by name in an interface
 def findEnum (name : String) (iface : Interface) : Option Enum :=
-  iface.enums.find? (fun e => e.name = name)
+  findByName name iface.enums
 
 -- Get all message names (requests + events) for an interface
 def messageNames (iface : Interface) : List String :=
@@ -34,6 +38,34 @@ def interfaceVersion (name : String) : Option Nat :=
 def interfaceNames : List String :=
   allInterfaces.map (fun iface => iface.name)
 
+-- Type class for validation
+class Validatable (α : Type) where
+  isValid : α → Bool
+
+instance : Validatable Arg where
+  isValid arg := match arg.argType with
+    | ArgType.object | ArgType.newId =>
+      match arg.interfaceName with
+      | none => false
+      | some name => (findInterface name allInterfaces).isSome
+    | _ => true
+
+instance : Validatable Message where
+  isValid msg := msg.args.all Validatable.isValid
+
+instance : Validatable Interface where
+  isValid iface :=
+    (iface.requests.all Validatable.isValid) && (iface.events.all Validatable.isValid)
+
+-- More idiomatic validation functions
+def argTypeValid (arg : Arg) : Bool := Validatable.isValid arg
+def messageValid (msg : Message) : Bool := Validatable.isValid msg
+def interfaceValid (iface : Interface) : Bool := Validatable.isValid iface
+
+-- Validate entire protocol
+def protocolValid : Bool :=
+  allInterfaces.all Validatable.isValid
+
 -- Count total requests in protocol
 def totalRequests : Nat :=
   allInterfaces.foldl (fun acc iface => acc + iface.requests.length) 0
@@ -42,25 +74,16 @@ def totalRequests : Nat :=
 def totalEvents : Nat :=
   allInterfaces.foldl (fun acc iface => acc + iface.events.length) 0
 
--- Validate that an argument type references an existing interface
-def argTypeValid (arg : Arg) : Bool :=
-  match arg.argType with
-  | ArgType.object | ArgType.newId =>
-    match arg.interfaceName with
-    | none => false
-    | some name => (findInterface name allInterfaces).isSome
-  | _ => true
+-- Count total messages
+def totalMessages : Nat :=
+  totalRequests + totalEvents
 
--- Check if all arguments in a message are valid
-def messageValid (msg : Message) : Bool :=
-  msg.args.all argTypeValid
+-- Count items by predicate
+def countWhere [Validatable α] (items : List α) (p : α → Bool) : Nat :=
+  items.foldl (fun acc item => if p item then acc + 1 else acc) 0
 
--- Check if an interface is valid
-def interfaceValid (iface : Interface) : Bool :=
-  (iface.requests.all messageValid) && (iface.events.all messageValid)
-
--- Validate entire protocol
-def protocolValid : Bool :=
-  allInterfaces.all interfaceValid
+-- Count valid items in a list
+def countValid [Validatable α] (items : List α) : Nat :=
+  countWhere items Validatable.isValid
 
 end WaylandProtocol
