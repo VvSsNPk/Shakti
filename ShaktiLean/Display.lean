@@ -1,11 +1,14 @@
 import Std
 
--- Display initialization and rendering via C FFI
--- Calls into Rust display library (shakti_display)
+-- Display orchestration via subprocess spawning
+-- Lean controls when the GPU display runs
+-- Rust handles event loop and GPU rendering
 
 namespace ShaktiDisplay
 
--- FFI functions exported from Rust
+-- These FFI bindings are kept for reference but not used in subprocess model
+-- They would be used if we implement direct library calling in the future
+
 @[extern "display_init"]
 opaque display_init : IO UInt32
 
@@ -20,8 +23,6 @@ opaque display_get_elapsed_ms : IO UInt64
 
 @[extern "display_shutdown"]
 opaque display_shutdown : IO Unit
-
--- Lean wrapper types and functions
 
 structure DisplayHandle where
   initialized : Bool
@@ -43,38 +44,47 @@ def displayGetElapsedMs : IO UInt64 := do
 def displayShutdown : IO Unit := do
   display_shutdown
 
--- Main render loop for Lean compositor
--- This is called from Lean's Main.lean
-def compositorMainLoop (maxFrames : Nat := 600) : IO Unit := do
-  let display ← displayCreate
+-- Main compositor entry point
+-- Spawns Rust display as a subprocess under Lean's control
+def compositorMainLoop (_ : Nat := 600) : IO Unit := do
+  let displayBinary := "./shakti_display/target/release/shakti_display"
 
-  if not display.initialized then
-    IO.println "Error: Failed to initialize display"
+  -- Verify display binary exists
+  let exists ← System.FilePath.pathExists displayBinary
+  if not exists then
+    IO.println s"✗ Error: Display binary not found at {displayBinary}"
+    IO.println "  Build with: cargo build --release -p shakti_display"
     return
 
   IO.println ""
-  let rec renderLoop (frame : Nat) : IO Unit := do
-    if frame >= maxFrames then
-      IO.println "\nCompleted target frame count"
-      return
+  IO.println "╔════════════════════════════════════════╗"
+  IO.println "║  Lean-Driven Compositor Display      ║"
+  IO.println "║  (Lean orchestrates Rust GPU)        ║"
+  IO.println "╚════════════════════════════════════════╝"
+  IO.println ""
+  IO.println "Spawning GPU display subprocess..."
+  IO.println ""
 
-    -- Render one frame (includes compositor logic)
-    let success ← displayRenderFrame
+  -- Spawn Rust display as subprocess
+  -- Rust owns: windowing system, GPU device, event loop
+  -- Lean owns: process control, compositor logic, protocol handling
+  let proc ← IO.Process.spawn {
+    cmd := displayBinary
+    stdin := IO.Process.Stdio.null
+    stdout := IO.Process.Stdio.inherit
+    stderr := IO.Process.Stdio.inherit
+  }
 
-    if not success then
-      IO.println "\nError: Frame rendering failed"
-      return
+  -- Wait for display process to complete
+  let exitCode ← proc.wait
 
-    renderLoop (frame + 1)
+  IO.println ""
+  if exitCode == 0 then
+    IO.println "✓ Display subprocess completed successfully"
+  else
+    IO.println s"✗ Display subprocess exited with code {exitCode}"
 
-  renderLoop 0
-
-  -- Shutdown
-  displayShutdown
-  elapsed ← displayGetElapsedMs
-  frames ← displayGetFrameCount
-
-  IO.println s"\n✓ Total frames: {frames}"
-  IO.println s"✓ Elapsed: {elapsed}ms"
+  IO.println ""
+  IO.println "Lean compositor orchestration complete."
 
 end ShaktiDisplay
