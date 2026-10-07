@@ -8,3 +8,9 @@ name = "ShaktiLean"
 [[lean_exe]]
 name = "shakti_lean"
 root = "Main"
+supportInterp = true
+
+# Link against Rust display library
+# Built with: cargo build --release -p shakti_display --lib
+[[lean_exe.moreServerArgs]]
+"--link-flags=-L shakti_display/target/release -l static=shakti_display"

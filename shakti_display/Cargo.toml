@@ -9,6 +9,14 @@ wgpu = "0.20"
 pollster = "0.3"
 chrono = "0.4"
 
+[lib]
+name = "shakti_display"
+crate-type = ["staticlib", "rlib"]
+
+[[bin]]
+name = "shakti_display"
+path = "src/main.rs"
+
 [profile.dev]
 opt-level = 0
 

@@ -15,3 +15,4 @@ import ShaktiLean.EventLoop
 import ShaktiLean.GraphicsFFI
 import ShaktiLean.Renderer
 import ShaktiLean.FFI
+import ShaktiLean.Display
