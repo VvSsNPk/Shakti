@@ -2,20 +2,16 @@
 
 This guide explains the Wayland wire protocol format and provides inspiration for implementing serialization in Lean 4.
 
-## Key Resources in Your Repository
+## Key Resources
 
 ### 1. **Protocol Specification** (Official)
-```
-📍 /home/royaleinstein/Documents/Wayland/wayland/protocol/wayland.xml
-```
+- [Wayland Protocol Specification](https://wayland.freedesktop.org/)
 - Complete XML definition of all interfaces and messages
 - Argument types and their encoding
 - Official reference
 
 ### 2. **Reference Implementation** (libwayland)
-```
-📍 /home/royaleinstein/Documents/Wayland/wayland/src/connection.c
-```
+- [libwayland C Implementation](https://gitlab.freedesktop.org/wayland/wayland)
 - Ring buffer management for I/O
 - Actual serialization code
 - File descriptor passing mechanism
@@ -278,8 +274,8 @@ example :
 
 ## Inspiration Sources
 
-- **Libwayland C implementation**: `/home/royaleinstein/Documents/Wayland/wayland/src/connection.c`
-- **Wayland protocol spec**: `/home/royaleinstein/Documents/Wayland/wayland/protocol/wayland.xml`
+- **[Libwayland C implementation](https://gitlab.freedesktop.org/wayland/wayland)** - Ring buffers and serialization
+- **[Wayland Protocol Specification](https://wayland.freedesktop.org/)** - Official protocol reference
 - **Rust implementation**: Look at `wayland-rs` for Rust patterns
 - **Go implementation**: Look at `go-wayland` for different approach
 

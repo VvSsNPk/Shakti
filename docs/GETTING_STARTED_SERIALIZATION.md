@@ -147,15 +147,17 @@ def testEncoding : IO Unit := do
 - [ ] Handle FD passing (ancillary data)
 - [ ] Implement region serialization
 
-## References in Your Repository
+## References
 
 ### Specification
-- `/home/royaleinstein/Documents/Wayland/wayland/protocol/wayland.xml`
-- `/home/royaleinstein/Documents/Wayland/wayland/doc/`
+- [Wayland Protocol Specification](https://wayland.freedesktop.org/) - Official protocol documentation
+- Wayland protocol XML specification
 
 ### Reference Implementation (C)
-- `/home/royaleinstein/Documents/Wayland/wayland/src/connection.c` - Ring buffer
-- `/home/royaleinstein/Documents/Wayland/wayland/src/wayland-client.c` - Client lib
+- **libwayland** - Official Wayland C implementation
+  - Connection management and ring buffers
+  - Client library implementation
+  - Available at https://gitlab.freedesktop.org/wayland/wayland
 
 ### Current Implementation
 - `ShaktiLean/Serialization.lean` - Lean 4 serialization

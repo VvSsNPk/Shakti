@@ -182,7 +182,6 @@ match findInterface "wl_surface" allInterfaces with
 ## Building
 
 ```bash
-cd /home/royaleinstein/Documents/Wayland/skakti_lean
 lake build
 ```
 
