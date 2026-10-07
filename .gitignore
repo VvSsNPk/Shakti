@@ -1,1 +1,40 @@
-/.lake
+# Rust build artifacts
+/target/
+/shakti_display/target/
+Cargo.lock
+
+# Lean build artifacts
+.lake/
+.lake/build/
+*.olean
+*.ilean
+
+# Build outputs
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Dependencies
+.elan/

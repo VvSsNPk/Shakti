@@ -1,0 +1,17 @@
+[package]
+name = "shakti_display"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+winit = "0.29"
+wgpu = "0.20"
+pollster = "0.3"
+chrono = "0.4"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+lto = true
