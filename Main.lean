@@ -2,14 +2,6 @@ import ShaktiLean
 
 open WaylandProtocol ShaktiDisplay
 
--- Main compositor entry point - orchestrates Rust display from Lean
-def runCompositorDisplay : IO Unit := do
-  showSystemInfo
-  IO.println ""
-  IO.println "═════════════════════════════════════════════"
-  IO.println ""
-  await compositorMainLoop 600
-
 def showSystemInfo : IO Unit := do
   IO.println ""
   IO.println "ShaktiLean Compositor Framework"
@@ -35,6 +27,13 @@ def showSystemInfo : IO Unit := do
   IO.println "  • State machine validation"
   IO.println "  • Damage tracking"
   IO.println "  • Frame statistics"
+
+def runCompositorDisplay : IO Unit := do
+  showSystemInfo
+  IO.println ""
+  IO.println "═════════════════════════════════════════════"
+  IO.println ""
+  compositorMainLoop 600
 
 def main : IO Unit := do
   runCompositorDisplay

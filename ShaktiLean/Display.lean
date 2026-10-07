@@ -49,13 +49,6 @@ def displayShutdown : IO Unit := do
 def compositorMainLoop (_ : Nat := 600) : IO Unit := do
   let displayBinary := "./shakti_display/target/release/shakti_display"
 
-  -- Verify display binary exists
-  let exists ← System.FilePath.pathExists displayBinary
-  if not exists then
-    IO.println s"✗ Error: Display binary not found at {displayBinary}"
-    IO.println "  Build with: cargo build --release -p shakti_display"
-    return
-
   IO.println ""
   IO.println "╔════════════════════════════════════════╗"
   IO.println "║  Lean-Driven Compositor Display      ║"
@@ -65,26 +58,31 @@ def compositorMainLoop (_ : Nat := 600) : IO Unit := do
   IO.println "Spawning GPU display subprocess..."
   IO.println ""
 
-  -- Spawn Rust display as subprocess
-  -- Rust owns: windowing system, GPU device, event loop
-  -- Lean owns: process control, compositor logic, protocol handling
-  let proc ← IO.Process.spawn {
-    cmd := displayBinary
-    stdin := IO.Process.Stdio.null
-    stdout := IO.Process.Stdio.inherit
-    stderr := IO.Process.Stdio.inherit
-  }
+  try
+    -- Spawn Rust display as subprocess
+    -- Rust owns: windowing system, GPU device, event loop
+    -- Lean owns: process control, compositor logic, protocol handling
+    let proc ← IO.Process.spawn {
+      cmd := displayBinary
+      stdin := IO.Process.Stdio.null
+      stdout := IO.Process.Stdio.inherit
+      stderr := IO.Process.Stdio.inherit
+    }
 
-  -- Wait for display process to complete
-  let exitCode ← proc.wait
+    -- Wait for display process to complete
+    let exitCode ← proc.wait
 
-  IO.println ""
-  if exitCode == 0 then
-    IO.println "✓ Display subprocess completed successfully"
-  else
-    IO.println s"✗ Display subprocess exited with code {exitCode}"
+    IO.println ""
+    if exitCode == 0 then
+      IO.println "✓ Display subprocess completed successfully"
+    else
+      IO.println s!"✗ Display subprocess exited with code {exitCode}"
 
-  IO.println ""
-  IO.println "Lean compositor orchestration complete."
+    IO.println ""
+    IO.println "Lean compositor orchestration complete."
+  catch e : IO.Error =>
+    IO.println s!"✗ Error spawning display: {e}"
+    IO.println s!"  Binary: {displayBinary}"
+    IO.println "  Build with: cargo build --release -p shakti_display"
 
 end ShaktiDisplay
